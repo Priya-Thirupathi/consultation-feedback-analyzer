@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Upload written public consultation responses and see what was actually argued, ranked by how many organisations argued it."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Heard · Consultation feedback analysis</title>
+
+    <!-- Roboto only. Google's own pages also load Google Sans / Google Sans
+         Text, but those are served under the "googlerestricted" licence
+         (Google products only), so we name them in the CSS font stack — where
+         they resolve if a machine already has them — and download none of them.
+         Roboto is Apache-2.0 and is the Material 3 default face. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Applied before first paint, so someone who chose dark last time does
+         not get a flash of the light theme while React boots. -->
+    <script>
+      try {
+        if (localStorage.getItem("cfa-theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

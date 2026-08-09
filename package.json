@@ -1,0 +1,39 @@
+{
+  "name": "consultation-analyzer",
+  "version": "0.1.0",
+  "description": "Public consultation feedback analyzer. Reads public comments, extracts the main theme of each, and shows the top themes ranked by count. Byte Squad, Tech for Good 2026.",
+  "type": "module",
+  "main": "src/index.ts",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env src/index.ts",
+    "dev": "node --disable-warning=ExperimentalWarning --env-file-if-exists=.env --watch src/index.ts",
+    "dev:web": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.server.json",
+    "fetch": "node --disable-warning=ExperimentalWarning --env-file=.env scripts/fetch-regulations.ts",
+    "fetch:trai": "node --disable-warning=ExperimentalWarning --env-file=.env scripts/fetch-trai.ts",
+    "benchmark": "node --disable-warning=ExperimentalWarning --env-file=.env scripts/benchmark.ts"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "csv-parse": "^5.5.6",
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0",
+    "multer": "^1.4.5-lts.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1"
+  }
+}

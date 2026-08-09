@@ -1,0 +1,22 @@
+# Deploy config for Render. One web service, no database.
+#
+# Node 24 is not optional: the server runs its .ts files directly and relies on
+# Node stripping the types at runtime. On an older Node, `node src/index.ts`
+# fails to start.
+#
+# --include=dev because Render sets NODE_ENV=production, which would otherwise
+# skip vite and leave the build with nothing to run.
+
+services:
+  - type: web
+    name: consultation-analyzer
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.2.0
+      - key: GEMINI_API_KEY
+        sync: false

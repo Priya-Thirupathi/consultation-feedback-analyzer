@@ -1,0 +1,22 @@
+# Secrets
+.env
+.env.local
+*.local
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Client build output
+dist/
+docs/outreach.md

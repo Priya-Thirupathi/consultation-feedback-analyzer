@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Heard · Consultation feedback analysis</title>
+<style>
+  :root {
+    color-scheme: light;
+    --plane:      #f9f9f7;
+    --surface:    #fcfcfb;
+    --ink:        #0b0b0b;
+    --ink-2:      #52514e;
+    --muted:      #898781;
+    --rule:       #e1e0d9;
+    --baseline:   #c3c2b7;
+    --series:     #2a78d6;
+    --series-dim: #cde2fb;
+    --border:     rgba(11,11,11,0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --plane:      #0d0d0d;
+      --surface:    #1a1a19;
+      --ink:        #ffffff;
+      --ink-2:      #c3c2b7;
+      --muted:      #898781;
+      --rule:       #2c2c2a;
+      --baseline:   #383835;
+      --series:     #3987e5;
+      --series-dim: #184f95;
+      --border:     rgba(255,255,255,0.10);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --plane: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7;
+    --muted: #898781; --rule: #2c2c2a; --baseline: #383835;
+    --series: #3987e5; --series-dim: #184f95; --border: rgba(255,255,255,0.10);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--plane);
+    color: var(--ink);
+    margin: 0;
+    padding: 32px 20px 80px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; }
+
+  header h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--ink-2); font-size: 15px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  input[type=file] { font: inherit; font-size: 14px; color: var(--ink-2); max-width: 100%; }
+  button {
+    font: inherit; font-weight: 600; font-size: 14px;
+    background: var(--series); color: #fff;
+    border: 0; padding: 9px 18px; border-radius: 8px; cursor: pointer;
+  }
+  button:disabled { opacity: 0.55; cursor: default; }
+  .status { margin: 12px 0 0; color: var(--ink-2); font-size: 14px; min-height: 20px; }
+  .status.error { color: #d03b3b; }
+
+  /* KPI row */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .kpi .label { font-size: 13px; color: var(--muted); }
+  .kpi .value { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; margin-top: 2px; }
+  .kpi .sub { font-size: 12px; color: var(--muted); }
+
+  /* Chart */
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .chart-head h2 { font-size: 16px; margin: 0; }
+  .chart-head .note { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+  .toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .toggle button {
+    background: transparent; color: var(--ink-2); font-weight: 500;
+    padding: 6px 12px; border-radius: 0; font-size: 13px;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--series); color: #fff; font-weight: 600; }
+
+  .bars { margin-top: 18px; display: grid; gap: 10px; }
+  /* Three fixed columns, not a flex row. With the value label sharing a flex
+     line the bar gets shrunk to make room for it, so a bar of half the value
+     rendered at 59% of the longest instead of 50% and the scale lied. The
+     label needs its own column so every bar measures against the same width. */
+  .row { display: grid; grid-template-columns: minmax(120px, 220px) 1fr 108px; gap: 14px; align-items: center; }
+  .row .name { font-size: 13px; color: var(--ink-2); text-align: right; overflow-wrap: anywhere; }
+  .track { border-left: 1px solid var(--baseline); }
+  .bar {
+    height: 20px; background: var(--series);
+    border-radius: 0 4px 4px 0; min-width: 2px;
+    transition: width 0.25s ease;
+  }
+  .row:hover .bar { filter: brightness(1.08); }
+  .tip { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  #tooltip {
+    position: fixed; pointer-events: none; opacity: 0; transition: opacity .12s;
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 13px; max-width: 280px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.14); z-index: 10;
+  }
+  #tooltip .t-theme { font-weight: 600; margin-bottom: 2px; }
+  #tooltip .t-orgs { color: var(--muted); font-size: 12px; }
+
+  /* Theme detail list (also the table view) */
+  .theme { padding: 16px 0; border-top: 1px solid var(--rule); }
+  .theme:first-of-type { border-top: 0; }
+  .theme h3 { font-size: 15px; margin: 0 0 6px; display: flex; gap: 8px; align-items: baseline; }
+  .theme h3 .rank { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .counts { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .chips { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12px; color: var(--ink-2); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; }
+  blockquote {
+    margin: 10px 0 0; padding-left: 12px;
+    border-left: 2px solid var(--series-dim);
+    color: var(--ink-2); font-size: 14px;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Heard</h1>
+    <p>Upload written consultation responses. See what was actually argued, and how many organisations argued it.</p>
+  </header>
+
+  <div class="card">
+    <div class="controls">
+      <input type="file" id="file" accept=".csv" />
+      <button id="go">Analyze</button>
+    </div>
+    <p class="status" id="status"></p>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="card">
+      <div class="chart-head">
+        <div>
+          <h2 id="chartTitle">Themes by organisations that raised them</h2>
+          <p class="note" id="chartNote"></p>
+        </div>
+        <div class="toggle" role="group" aria-label="Ranking method">
+          <button id="byOrgs" aria-pressed="true">By organisations</button>
+          <button id="byChunks" aria-pressed="false">By mentions</button>
+        </div>
+      </div>
+      <div class="bars" id="bars"></div>
+    </div>
+
+    <div class="card" id="details"></div>
+  </div>
+</div>
+
+<div id="tooltip" role="status"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+// Everything from the CSV and the model is untrusted text. Real submissions are
+// PDF extracts full of angle brackets and ampersands, so build with text nodes
+// rather than innerHTML anywhere a value is interpolated.
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = String(text);
+  return n;
+};
+
+let DATA = null;
+let mode = "orgs";           // "orgs" | "chunks"
+let hasOrgs = false;
+
+$("go").addEventListener("click", analyze);
+$("byOrgs").addEventListener("click", () => setMode("orgs"));
+$("byChunks").addEventListener("click", () => setMode("chunks"));
+
+async function analyze() {
+  const file = $("file").files[0];
+  const status = $("status");
+  status.className = "status";
+
+  if (!file) { status.textContent = "Pick a CSV first."; return; }
+
+  // A 40 row file takes about 20 seconds and a full docket takes minutes,
+  // because requests are paced under the free tier limit. A silent button for
+  // two minutes reads as a crash, so show the estimate and a running clock.
+  const rows = await countRows(file);
+  const estimate = Math.max(10, Math.round(rows * 0.55));
+  $("go").disabled = true;
+  const started = Date.now();
+  const tick = setInterval(() => {
+    const s = Math.round((Date.now() - started) / 1000);
+    status.textContent = `Reading ${rows} responses with Gemini… ${s}s elapsed, usually about ${estimate}s.`;
+  }, 250);
+
+  try {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/analyze", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || `Server error ${res.status}`);
+
+    DATA = data;
+    hasOrgs = data.organisations != null;
+    mode = hasOrgs ? "orgs" : "chunks";
+    render();
+    $("results").classList.remove("hidden");
+    status.textContent = `Done in ${Math.round((Date.now() - started) / 1000)}s.`;
+  } catch (e) {
+    status.className = "status error";
+    status.textContent = e.message;
+  } finally {
+    clearInterval(tick);
+    $("go").disabled = false;
+  }
+}
+
+// Rough row count for the estimate only. Reading the file twice is cheap
+// compared with the analysis, and a wrong guess here costs nothing.
+function countRows(file) {
+  return file.text().then((t) => Math.max(1, t.trim().split("\n").length - 1)).catch(() => 0);
+}
+
+function setMode(next) {
+  if (!hasOrgs && next === "orgs") return;
+  mode = next;
+  $("byOrgs").setAttribute("aria-pressed", String(mode === "orgs"));
+  $("byChunks").setAttribute("aria-pressed", String(mode === "chunks"));
+  render();
+}
+
+const valueOf = (t) => (mode === "orgs" ? t.organisations ?? 0 : t.chunks);
+
+function sorted() {
+  return [...DATA.themes].sort((a, b) => valueOf(b) - valueOf(a) || b.chunks - a.chunks);
+}
+
+function render() {
+  renderKpis();
+  renderBars();
+  renderDetails();
+}
+
+function renderKpis() {
+  const d = DATA;
+  const box = $("kpis");
+  box.replaceChildren();
+
+  const tiles = [
+    ["Responses read", d.total, "chunks of text"],
+    ["Carried a position", d.analyzed, `${d.skipped} set aside as boilerplate`],
+    ["Organisations", d.organisations ?? "—", d.organisations ? "distinct stakeholders" : "no org column in this file"],
+    ["Themes found", d.themeCount, "after merging synonyms"],
+  ];
+
+  for (const [label, value, sub] of tiles) {
+    const t = el("div", "kpi");
+    t.append(el("div", "label", label), el("div", "value", value), el("div", "sub", sub));
+    box.append(t);
+  }
+}
+
+function renderBars() {
+  const rows = sorted();
+  const max = Math.max(1, ...rows.map(valueOf));
+  const unit = mode === "orgs" ? "organisation" : "mention";
+
+  $("chartTitle").textContent =
+    mode === "orgs" ? "Themes by organisations that raised them" : "Themes by mentions in the text";
+  $("chartNote").textContent =
+    mode === "orgs"
+      ? "One organisation's long submission counts once."
+      : "Every chunk counts, so a single long submission can dominate.";
+
+  const box = $("bars");
+  box.replaceChildren();
+
+  for (const t of rows) {
+    const v = valueOf(t);
+    const row = el("div", "row");
+    row.append(el("div", "name", t.theme));
+
+    const track = el("div", "track");
+    const bar = el("div", "bar");
+    bar.style.width = `${(v / max) * 100}%`;
+    track.append(bar);
+    row.append(track, el("div", "tip", `${v} ${unit}${v === 1 ? "" : "s"}`));
+
+    row.addEventListener("mousemove", (e) => showTip(e, t));
+    row.addEventListener("mouseleave", hideTip);
+    box.append(row);
+  }
+}
+
+function showTip(e, t) {
+  const tip = $("tooltip");
+  tip.replaceChildren();
+  tip.append(el("div", "t-theme", t.theme));
+  tip.append(el("div", null, `${t.chunks} mention${t.chunks === 1 ? "" : "s"}` +
+    (t.organisations != null ? ` · ${t.organisations} organisation${t.organisations === 1 ? "" : "s"}` : "")));
+  if (t.orgNames && t.orgNames.length) tip.append(el("div", "t-orgs", t.orgNames.join(", ")));
+  tip.style.opacity = "1";
+  // Flip to the left of the cursor near the right edge so it never runs off.
+  const x = e.clientX + 14;
+  tip.style.left = (x + 280 > window.innerWidth ? e.clientX - 294 : x) + "px";
+  tip.style.top = Math.min(e.clientY + 14, window.innerHeight - 90) + "px";
+}
+function hideTip() { $("tooltip").style.opacity = "0"; }
+
+function renderDetails() {
+  const box = $("details");
+  box.replaceChildren();
+
+  for (const [i, t] of sorted().entries()) {
+    const wrap = el("div", "theme");
+
+    const h = el("h3");
+    h.append(el("span", "rank", `${i + 1}.`), el("span", null, t.theme));
+    wrap.append(h);
+
+    const counts = t.organisations != null
+      ? `${t.organisations} organisation${t.organisations === 1 ? "" : "s"} · ${t.chunks} mention${t.chunks === 1 ? "" : "s"}`
+      : `${t.chunks} mention${t.chunks === 1 ? "" : "s"}`;
+    wrap.append(el("div", "counts", counts));
+
+    if (t.orgNames && t.orgNames.length) {
+      const chips = el("div", "chips");
+      for (const o of t.orgNames) chips.append(el("span", "chip", o));
+      wrap.append(chips);
+    }
+
+    if (t.sample) wrap.append(el("blockquote", null, `“${t.sample}”`));
+    box.append(wrap);
+  }
+}
+</script>
+</body>
+</html>

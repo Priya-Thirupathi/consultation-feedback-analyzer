@@ -1,0 +1,12 @@
+{
+  "model": {
+    "name": "gemini-3.1-flash-lite"
+  },
+  "agents": {
+    "overrides": {
+      "browser_agent": {
+        "enabled": true
+      }
+    }
+  }
+}

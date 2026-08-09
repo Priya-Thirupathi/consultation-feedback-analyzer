@@ -1,0 +1,1430 @@
+/* ---------------------------------------------------------------------------
+   Google / Material 3 theme.
+
+   The tokens below are the values Google actually ships on its own product
+   pages (read off google.com/about/careers/applications): text #1f1f1f /
+   #444746 / #5f6368, blue #1a73e8 with the #e8f0fe container, surfaces #f8f9fa
+   and #f0f4f9, outlines #e8eaed / #c4c7c5, radii 8px through full pills.
+
+   Two things carry the "Google" feel more than colour does:
+     - Weights 400 and 500 only. No bold headings. Large type is LIGHT and
+       roomy; the size does the work.
+     - Slightly POSITIVE letter-spacing on small text (0.1–0.4px), never the
+       tight negative tracking of a startup landing page.
+
+   Light is the default. Dark sits behind the app-bar toggle only, never
+   prefers-color-scheme, so the product never repaints itself to match a
+   machine setting nobody chose.
+   ------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  /* Google loads Google Sans / Google Sans Text, which are served under the
+     "googlerestricted" licence (Google products only). We load Roboto — the
+     open, Apache-2.0 Google font — and merely NAME the restricted faces first,
+     so machines that already have them installed use them and nobody else
+     downloads a font we have no licence to redistribute. */
+  --font: "Google Sans Text", "Google Sans", Roboto, Arial, sans-serif;
+  --font-display: "Google Sans Flex", "Google Sans Text", "Google Sans", Roboto, Arial, sans-serif;
+
+  --plane: #ffffff;
+  --surface-1: #f8f9fa;
+  --surface-2: #f0f4f9;
+  --surface-3: #e8eaed;
+
+  --ink: #1f1f1f;
+  --ink-2: #444746;
+  --ink-3: #5f6368;
+  --muted: #80868b;
+
+  --outline: #c4c7c5;
+  --outline-variant: #e8eaed;
+
+  --primary: #1a73e8;
+  --primary-hover: #1967d2;
+  --primary-container: #e8f0fe;
+  --on-primary-container: #0b57d0;
+
+  /* The bar colour. In light mode it is the same blue as the UI; in dark the
+     two part ways, because the chrome blue (#8ab4f8) is too light to sit in
+     the dark-surface band for a data mark. Both series steps are validated at
+     >=3:1 against their own surface. */
+  --series: #1a73e8;
+  --series-track: #d3e3fd;
+
+  --error: #d93025;
+  --error-container: #fce8e6;
+  --success: #1e8e3e;
+
+  --elev-1: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  --elev-2: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --plane: #131314;
+  --surface-1: #1e1f20;
+  --surface-2: #282a2c;
+  --surface-3: #333537;
+
+  --ink: #e3e3e3;
+  --ink-2: #c4c7c5;
+  --ink-3: #9aa0a6;
+  --muted: #8e918f;
+
+  --outline: #444746;
+  --outline-variant: #303134;
+
+  --primary: #8ab4f8;
+  --primary-hover: #aecbfa;
+  /* A muted navy, not Blue 900. The saturated container that reads as a gentle
+     tint on white becomes the loudest thing on the screen against a dark
+     plane. */
+  --primary-container: #1f3760;
+  --on-primary-container: #d3e3fd;
+
+  --series: #4285f4;
+  --series-track: #1f3760;
+
+  --error: #f28b82;
+  --error-container: #3b1f1c;
+  --success: #81c995;
+
+  --elev-1: 0 1px 2px 0 rgba(0, 0, 0, 0.6), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
+  --elev-2: 0 1px 2px 0 rgba(0, 0, 0, 0.6), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.25px;
+  background: var(--plane);
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Google's own headings run at weight 400 — anything heavier stops reading as
+   Google immediately. 500 is the heaviest weight anywhere in this file. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ============================================================== app shell == */
+
+.shell {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  grid-template-rows: 64px 1fr;
+  grid-template-areas:
+    "bar bar"
+    "rail main";
+}
+
+/* ---------------------------------------------------------------- app bar - */
+
+.appbar {
+  grid-area: bar;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 0 20px;
+  background: var(--plane);
+}
+.appbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.appbar-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: #fff;
+  flex: none;
+}
+:root[data-theme="dark"] .appbar-mark {
+  color: #0842a0;
+}
+.appbar-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.appbar-title b {
+  font-weight: 500;
+}
+.appbar-spacer {
+  flex: 1;
+}
+.appbar-tag {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- nav rail --- */
+
+.rail {
+  grid-area: rail;
+  position: sticky;
+  top: 64px;
+  align-self: start;
+  height: calc(100vh - 64px);
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--plane);
+}
+.rail-item {
+  width: 76px;
+  border: 0;
+  background: transparent;
+  padding: 4px 0 8px;
+  border-radius: 12px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: var(--ink-2);
+}
+.rail-item:disabled {
+  color: var(--muted);
+  opacity: 0.5;
+  cursor: default;
+}
+/* The 56x32 pill behind the icon is the Material 3 rail indicator — it is what
+   makes this read as a Google rail rather than a generic sidebar. */
+.rail-icon {
+  width: 56px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.rail-item:hover:not(:disabled) .rail-icon {
+  background: var(--surface-2);
+}
+.rail-item[aria-current="page"] .rail-icon {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+.rail-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+.rail-item[aria-current="page"] .rail-label {
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ main -- */
+
+/* The blue-grey surface container, with white cards floating on it. #f8f9fa is
+   too close to white to read as a separate plane — the page looked unfinished
+   rather than layered. */
+.main {
+  grid-area: main;
+  min-width: 0;
+  background: var(--surface-2);
+  border-top-left-radius: 16px;
+  padding: 28px 32px 80px;
+}
+.view {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.view-head {
+  margin-bottom: 24px;
+}
+.view-head h1 {
+  font-size: 28px;
+  line-height: 36px;
+}
+.view-head p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+  max-width: 62ch;
+}
+
+/* =================================================================== card == */
+
+/* Filled cards on a tinted plane with no shadow — the Material 3 style Google
+   ships today. Elevation is reserved for things that genuinely float. */
+.card {
+  background: var(--plane);
+  border-radius: 16px;
+  padding: 24px;
+}
+/* Tonal cards sit on the blue-grey plane, so they take the primary container
+   rather than a grey — a grey card on a grey plane disappears. */
+.card-tonal {
+  background: var(--primary-container);
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.card-head h2 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: 0.15px;
+}
+.card-head .note {
+  margin: 4px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+}
+
+/* ================================================================ buttons == */
+
+.btn {
+  height: 40px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+:root[data-theme="dark"] .btn {
+  color: #0842a0;
+}
+.btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  box-shadow: var(--elev-1);
+}
+.btn:disabled {
+  background: var(--surface-3);
+  color: var(--muted);
+  cursor: default;
+}
+
+.btn-outlined {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--outline);
+  padding: 0 20px;
+}
+.btn-outlined:hover:not(:disabled) {
+  background: var(--primary-container);
+  box-shadow: none;
+}
+
+.btn-text {
+  height: 36px;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--primary);
+}
+.btn-text:hover:not(:disabled) {
+  background: var(--primary-container);
+  box-shadow: none;
+}
+
+/* Circular icon button on the Material 40px touch target. */
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  flex: none;
+  transition: background 0.15s ease;
+}
+.icon-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.icon-btn:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+:where(button, a, input, [tabindex]):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Material segmented button — the layout switch and the ranking switch. */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--outline);
+  border-radius: 999px;
+  overflow: hidden;
+  height: 36px;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.segmented button + button {
+  border-left: 1px solid var(--outline);
+}
+.segmented button:hover[aria-pressed="false"] {
+  background: var(--surface-2);
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================================== dropzone == */
+
+.upload-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.drop {
+  position: relative;
+  background: var(--plane);
+  border-radius: 16px;
+  padding: 28px;
+  transition: background 0.15s ease;
+}
+.drop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px dashed var(--outline-variant);
+  border-radius: 16px;
+  pointer-events: none;
+  transition: border-color 0.15s ease;
+}
+.drop.is-over {
+  background: var(--primary-container);
+}
+.drop.is-over::before {
+  border-color: var(--primary);
+}
+
+.drop-inner {
+  position: relative;
+  text-align: center;
+}
+.drop-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+.drop-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 28px;
+  margin: 0;
+}
+.drop-hint {
+  margin: 6px auto 0;
+  max-width: 46ch;
+  font-size: 13px;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+}
+.drop-hint code {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 12px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.drop-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px auto 0;
+  padding: 10px 8px 10px 16px;
+  max-width: 460px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  text-align: left;
+}
+.file-chip .name {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-chip .meta {
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.file-chip .spacer {
+  flex: 1;
+}
+
+/* ================================================================ how-to === */
+
+.howto {
+  display: grid;
+  gap: 12px;
+}
+.howto-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: var(--plane);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+.howto-num {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-size: 14px;
+  font-weight: 500;
+}
+.howto-item h3 {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+.howto-item p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+}
+
+/* =============================================================== progress == */
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.25px;
+  color: var(--ink-2);
+}
+.status.error {
+  color: var(--error);
+  background: var(--error-container);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.status.done {
+  color: var(--success);
+}
+.status .num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Determinate over an estimate: it eases to 95% and waits there, because
+   showing 100% before the response lands would be a lie. */
+.progress {
+  margin-top: 14px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--series-track);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--series);
+  transition: width 0.3s linear;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--series-track);
+  border-top-color: var(--series);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.notice {
+  margin: 20px 0 0;
+  padding: 14px 18px;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  border-radius: 12px;
+  font-size: 13px;
+  letter-spacing: 0.25px;
+}
+
+/* ============================================================= stat tiles == */
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+}
+.kpi {
+  background: var(--plane);
+  border-radius: 16px;
+  padding: 20px;
+}
+.kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  margin-bottom: 14px;
+}
+/* Proportional figures: tabular-nums pads every digit to a zero's width, which
+   reads loose at display size. Tabular is for columns of numbers. */
+.kpi .value {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.kpi .label {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  color: var(--ink);
+}
+.kpi .sub {
+  margin-top: 2px;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--ink-3);
+}
+
+/* ============================================================ overview 2col */
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+/* The one tonal card in the Overview split. It carries the finding, so it is
+   the only element allowed to be tinted — everything else is white on the
+   blue-grey plane. */
+.lead {
+  background: var(--primary-container);
+  border-radius: 16px;
+  padding: 24px;
+}
+.lead .eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--on-primary-container);
+}
+.lead h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 32px;
+  margin: 8px 0 0;
+}
+.lead .lead-counts {
+  margin-top: 6px;
+  font-size: 13px;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.lead blockquote {
+  margin: 16px 0 0;
+  padding: 0 0 0 16px;
+  border-left: 3px solid var(--series);
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: 0.25px;
+  color: var(--ink-2);
+}
+.lead-split {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--outline-variant);
+  display: grid;
+  gap: 12px;
+}
+.lead-split div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+}
+.lead-split b {
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+/* On the deep-blue dark container, the grey secondary ink drops to ~2.9:1.
+   The container's own on-colour is the readable pairing. */
+:root[data-theme="dark"] .lead .lead-counts,
+:root[data-theme="dark"] .lead .lead-split div,
+:root[data-theme="dark"] .lead blockquote {
+  color: var(--on-primary-container);
+}
+
+/* ================================================================== chart == */
+
+.bars {
+  margin-top: 24px;
+  display: grid;
+  gap: 2px;
+}
+/* Three columns, not a flex row: sharing a flex line let the value label shrink
+   the bar, so a half-value bar rendered at 59% of the longest instead of 50%. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) 1fr 116px;
+  gap: 16px;
+  align-items: center;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+.row:hover {
+  background: var(--surface-1);
+}
+.row .name {
+  font-size: 13px;
+  letter-spacing: 0.25px;
+  color: var(--ink-2);
+  text-align: right;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+.track {
+  border-left: 1px solid var(--outline-variant);
+  padding: 2px 0;
+}
+.bar {
+  height: 20px;
+  background: var(--series);
+  border-radius: 0 4px 4px 0;
+  min-width: 3px;
+  transition: width 0.4s cubic-bezier(0.2, 0, 0, 1);
+}
+/* Two stacked lines rather than one wrapping line: the column is a fixed width
+   (that is what keeps every bar on the same scale), so the primary value must
+   never be the part that wraps away. */
+.tip {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: 0.3px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tip .weak {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--plane);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  max-width: 280px;
+  box-shadow: var(--elev-2);
+  z-index: 40;
+}
+.tooltip .t-theme {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+.tooltip .t-orgs {
+  opacity: 0.72;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+:root[data-theme="dark"] .tooltip .t-orgs {
+  border-top-color: rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================ theme views == */
+
+.themes-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+/* Layout A — cards. Scannable; good for taking in the shape of the debate. */
+.theme-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.theme-card {
+  background: var(--plane);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.15s ease;
+}
+.theme-card:hover {
+  box-shadow: var(--elev-1);
+}
+.theme-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rank {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.theme-card h3 {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  letter-spacing: 0.15px;
+}
+.counts {
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+/* A share-of-max meter inside each card: the card grid has no shared axis the
+   way the bar chart does, so every card carries its own scale reference. */
+.meter {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--series-track);
+  overflow: hidden;
+}
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--series);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+.theme-card blockquote {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+}
+
+/* Layout B — list. Full quotes in reading order, nothing cut by a column. */
+.theme-list {
+  background: var(--plane);
+  border-radius: 16px;
+  padding: 8px 24px;
+}
+.theme {
+  padding: 22px 0;
+  border-top: 1px solid var(--outline-variant);
+}
+.theme:first-child {
+  border-top: 0;
+}
+.theme-head {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.theme-head h3 {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+  letter-spacing: 0.15px;
+}
+.theme-body {
+  padding-left: 48px;
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+.theme-body blockquote {
+  margin: 0;
+  padding: 16px 20px;
+  background: var(--surface-1);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: 0.25px;
+  color: var(--ink-2);
+}
+
+/* ================================================================== about == */
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+.about-card ul {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.about-card li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.6;
+  letter-spacing: 0.25px;
+  color: var(--ink-2);
+}
+.about-card li .dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-top: 8px;
+}
+.about-card.warn li .dot {
+  background: var(--muted);
+}
+
+/* ============================================================== skeletons == */
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 8px;
+  color: transparent;
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+.skel-line {
+  height: 12px;
+  margin: 8px 0;
+}
+
+/* ================================================================= empty === */
+
+.empty {
+  background: var(--plane);
+  border-radius: 16px;
+  padding: 56px 24px;
+  text-align: center;
+}
+.empty-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.empty h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 28px;
+}
+.empty p {
+  margin: 8px auto 0;
+  max-width: 44ch;
+  font-size: 14px;
+  letter-spacing: 0.25px;
+  color: var(--ink-3);
+}
+.empty .btn {
+  margin-top: 20px;
+}
+
+/* ============================================================= responsive == */
+
+@media (max-width: 900px) {
+  .upload-grid,
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  /* The rail becomes a bottom navigation bar, which is the Material pattern at
+     this width — an 88px column would eat a quarter of a phone screen. */
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 64px 1fr auto;
+    grid-template-areas:
+      "bar"
+      "main"
+      "rail";
+  }
+  .rail {
+    position: sticky;
+    top: auto;
+    bottom: 0;
+    z-index: 30;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 8px 4px;
+    border-top: 1px solid var(--outline-variant);
+    background: var(--surface-1);
+  }
+  .rail-item {
+    width: auto;
+    flex: 1;
+    max-width: 96px;
+  }
+  .main {
+    border-top-left-radius: 0;
+    padding: 20px 16px 32px;
+  }
+  .appbar-tag {
+    display: none;
+  }
+  .view-head h1 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+  .theme-body {
+    padding-left: 0;
+  }
+  .theme-list {
+    padding: 8px 16px;
+  }
+  /* Label and value share line one; the track takes the full width beneath.
+     Placed explicitly — auto-placement pushes the value onto a third row once
+     the track spans every column. */
+  .row {
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    padding: 10px 8px;
+  }
+  .row .name {
+    grid-area: 1 / 1;
+    text-align: left;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .row .tip {
+    grid-area: 1 / 2;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .track {
+    grid-area: 2 / 1 / 3 / -1;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Evidence: the source rows behind a theme.
+
+   Collapsed by default and styled quietly on purpose. It is the answer to "how
+   do we know the model got this right", but it is a check the analyst reaches
+   for, not the headline — so it must not compete with the ranking above it.
+   ------------------------------------------------------------------------- */
+.evidence {
+  border-top: 1px solid var(--outline-variant);
+  padding-top: 12px;
+}
+.evidence summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: var(--on-primary-container);
+  border-radius: 8px;
+  padding: 2px 4px;
+}
+.evidence summary:hover {
+  background: var(--primary-container);
+}
+.evidence summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.evidence-rows {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Long themes on the full run can hold dozens of rows. Scroll inside the
+     card rather than pushing the next theme off the page. */
+  max-height: 420px;
+  overflow-y: auto;
+}
+.evidence-rows li {
+  background: var(--surface-1);
+  border-radius: 8px;
+  /* Left rule ties the row to its id and gives the eye a return edge on the
+     long wrapped submissions, which is most of the real data. */
+  border-left: 3px solid var(--outline-variant);
+  padding: 12px 14px;
+}
+.evidence-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.evidence-id {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: var(--on-primary-container);
+  background: var(--primary-container);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-variant-numeric: tabular-nums;
+}
+.evidence-org {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: var(--ink-2);
+}
+/* Source rows are read, not skimmed: this is where an analyst checks the
+   machine. Body size and near-body colour, not the muted caption grey the
+   sample quote uses, and a measure that stops the long chunks running the full
+   width of a card. */
+.evidence-rows p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  letter-spacing: 0.15px;
+  color: var(--ink);
+  max-width: 68ch;
+  overflow-wrap: anywhere;
+}
+
+/* AI disclosure. Deliberately not styled as a warning: it is a statement of
+   what the tool is, and it carries the strongest claim we make — that the
+   quoted text is not model output. A red banner would read as an apology. */
+.ai-note {
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.65;
+  letter-spacing: 0.15px;
+  color: var(--ink-2);
+  max-width: 76ch;
+}
+.ai-note b {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* The written finding, above everything else on the Overview. Sized larger than
+   body text because it is the sentence the analyst came for; every tile below it
+   is a metric about the run rather than a result. Deliberately not a card: a
+   border would make it one panel among several, and this one is the lede. */
+.finding {
+  margin: 0 0 20px;
+  font-size: 19px;
+  line-height: 1.6;
+  letter-spacing: 0.1px;
+  color: var(--ink-2);
+  max-width: 76ch;
+  text-wrap: pretty;
+}
+.finding b {
+  font-weight: 500;
+  color: var(--ink);
+}
+.finding code {
+  font-size: 0.85em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+@media print {
+  /* On paper this is the opening line of the report, so it leads and never
+     splits across a page break. */
+  .finding {
+    font-size: 12pt;
+    color: #000;
+    break-after: avoid;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Saved reports.
+   ------------------------------------------------------------------------- */
+.toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.reports {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.report {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--plane);
+  border: 1px solid var(--outline-variant);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.report[aria-current="true"] {
+  border-color: var(--primary);
+  background: var(--primary-container);
+}
+.report-main h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  overflow-wrap: anywhere;
+}
+.report-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Print. The Themes view doubles as the report that goes into a committee
+   pack, so on paper the app furniture goes and the evidence comes out of its
+   disclosure — a printed report nobody can check is the thing we are arguing
+   against.
+   ------------------------------------------------------------------------- */
+.print-head {
+  display: none;
+}
+
+@media print {
+  .appbar,
+  .rail,
+  .themes-toolbar,
+  .view-head p {
+    display: none !important;
+  }
+
+  .shell,
+  .main {
+    display: block;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  .print-head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #999;
+    font-size: 11pt;
+  }
+
+  /* Force the disclosure open on paper. The rows are in the DOM either way;
+     only the user-agent style for a closed <details> hides them. */
+  .evidence[open] .evidence-rows,
+  .evidence .evidence-rows {
+    display: block !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .evidence summary {
+    display: none !important;
+  }
+
+  /* Keep a theme and its evidence on one sheet where it fits. */
+  .theme,
+  .theme-card,
+  .evidence-rows li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .theme-cards {
+    display: block;
+  }
+  .theme-card {
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
