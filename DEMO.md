@@ -80,7 +80,20 @@ Count rows, and that one organisation looks like twelve people. It buries a
 concern that eight separate organisations each raised once.
 
 On mentions, the ranking is loudest first. On organisations, most widely held
-first. Same data, one click, different top of the list.
+first.
+
+Do NOT say the top of the list changes. It does not, on either file, and the
+screen will contradict you. Measured: on the 223 row consultation the top three
+are identical in both modes, and the largest move in the file is risk-based
+regulation climbing two places. On the 40 row sample rank 1 is also unchanged.
+
+Say this instead, which is true and is the stronger claim:
+
+Here the two agree, and that is the finding. It means the loudest argument really
+is the most widely held, rather than one body writing at length. You only know
+that because you can switch. When they disagree, the analyst has been reading a
+ranking of stamina rather than a ranking of support, and nothing on the page
+would have told her.
 
 For an analyst those are two different questions, and only the second survives a
 committee.

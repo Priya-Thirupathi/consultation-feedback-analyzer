@@ -2,6 +2,14 @@
 
 Team 331 · AI for Strong Institutions (UN SDG 16) · Tech for Good 2026, GDG Coimbatore
 
+**Live: https://consultation-analyzer.onrender.com/** — the product is called
+Heard; `consultation-analyzer` is just the deployment hostname.
+
+Upload a CSV, or press "Use the sample" to run the 40 real TRAI responses in
+`data/trai_sample.csv`. A run of that size takes about 25 seconds; the free
+instance sleeps after inactivity, so the first request after a quiet spell costs
+about a minute.
+
 Reads a CSV of written public consultation responses, works out what each one is
 actually arguing, and shows the most raised themes ranked by how many
 stakeholders raised each, with a real quote for every theme — and the source

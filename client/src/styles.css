@@ -1034,6 +1034,68 @@ button {
   background: var(--muted);
 }
 
+/* The measured-accuracy card. Spans the grid because an analyst deciding
+   whether to put a ranking in front of a committee should not have to hunt for
+   how often it is wrong, and the numbers need room to be read as a set. */
+.accuracy-card {
+  grid-column: 1 / -1;
+}
+.about-lede {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.accuracy {
+  margin: 16px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+.accuracy > div {
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-radius: 10px;
+}
+.accuracy dt {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.accuracy dd {
+  margin: 6px 0 0;
+  display: grid;
+  gap: 4px;
+}
+.accuracy dd b {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.accuracy dd span {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.about-foot {
+  margin: 16px 0 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 78ch;
+}
+.about-foot b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.about-foot.muted {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* ============================================================== skeletons == */
 
 .skeleton {

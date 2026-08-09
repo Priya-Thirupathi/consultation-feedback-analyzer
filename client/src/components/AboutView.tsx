@@ -15,7 +15,33 @@ const DOES_NOT = [
   "English only. No Tamil or Tanglish yet.",
   "Does not say whether a response supports or opposes — only what it is about.",
   "Scanned PDFs with no text layer are skipped, not OCRed.",
-  "Accuracy is measured on a small hand-labelled set, so treat it as indicative.",
+  "Does not detect form-letter campaigns: identical text from many senders counts as many.",
+];
+
+/**
+ * Measured numbers, shown to the analyst rather than kept in a benchmark log.
+ *
+ * An analyst deciding whether to put a ranking in front of a committee needs to
+ * know how often it is wrong and in which direction, not just that it "can be
+ * wrong". Every figure here comes from scripts/benchmark.ts on
+ * data/trai_sample_labeled.csv and must be updated together with it.
+ */
+const ACCURACY = [
+  {
+    label: "Boilerplate set aside correctly",
+    value: "11 of 11",
+    note: "None wrongly kept, so nothing that was page furniture became a theme.",
+  },
+  {
+    label: "Real arguments given the right theme",
+    value: "22 of 29",
+    note: "76% end to end. Of the 24 rows it chose to keep, 22 were right — 92%.",
+  },
+  {
+    label: "Real arguments wrongly set aside",
+    value: "5 of 29",
+    note: "The costly error. Four of the five opened with a footnote, heading or bare list.",
+  },
 ];
 
 export function AboutView() {
@@ -57,6 +83,40 @@ export function AboutView() {
               </li>
             ))}
           </ul>
+        </div>
+
+        <div className="card about-card accuracy-card">
+          <div className="card-head">
+            <h2>How often it is right</h2>
+          </div>
+          <p className="about-lede">
+            Measured on 40 responses from a real TRAI consultation, each one read and
+            labelled by hand.
+          </p>
+
+          <dl className="accuracy">
+            {ACCURACY.map((a) => (
+              <div key={a.label}>
+                <dt>{a.value}</dt>
+                <dd>
+                  <b>{a.label}</b>
+                  <span>{a.note}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <p className="about-foot">
+            <b>Read this as a shortlist to verify, not a finding to cite.</b> Open a theme's
+            source rows before you quote it. The wording of a theme also shifts between runs,
+            so refer to the counts and the rows, never to a remembered label.
+          </p>
+          <p className="about-foot muted">
+            Caveats worth knowing: one consultation, in English, and 40 rows is a small sample,
+            so treat the percentages as indicative rather than precise. The checker that scores
+            these matches is from the same model family as the extractor, which makes it a
+            sanity check rather than an independent benchmark.
+          </p>
         </div>
 
         <div className="card card-tonal about-card">
