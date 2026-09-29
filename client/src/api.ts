@@ -65,11 +65,8 @@ function parseAnalysis(raw: unknown): AnalysisResult {
   };
 }
 
-export async function analyze(file: File): Promise<AnalysisResult> {
-  const body = new FormData();
-  body.append("file", file);
-
-  const res = await fetch("/api/analyze", { method: "POST", body });
+async function postAnalysis(url: string, body?: FormData): Promise<AnalysisResult> {
+  const res = await fetch(url, body ? { method: "POST", body } : { method: "POST" });
   const payload: unknown = await res.json().catch(() => null);
 
   if (!res.ok) {
@@ -80,6 +77,21 @@ export async function analyze(file: File): Promise<AnalysisResult> {
     throw new Error(message);
   }
   return parseAnalysis(payload);
+}
+
+export async function analyze(file: File): Promise<AnalysisResult> {
+  const body = new FormData();
+  body.append("file", file);
+  return postAnalysis("/api/analyze", body);
+}
+
+/**
+ * Runs the 40 real TRAI responses bundled in the repo (`data/trai_sample.csv`)
+ * through the same pipeline, so a first-time visitor sees a real report
+ * without owning a CSV of their own.
+ */
+export async function analyzeSample(): Promise<AnalysisResult> {
+  return postAnalysis("/api/analyze/sample");
 }
 
 /** Row count for the progress estimate only, so a failure must not block the upload. */

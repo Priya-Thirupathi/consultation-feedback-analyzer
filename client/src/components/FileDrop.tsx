@@ -9,6 +9,8 @@ interface Props {
   onSelect: (file: File) => void;
   onClear: () => void;
   onAnalyze: () => void;
+  /** Runs the 40 bundled TRAI responses instead of an uploaded file. */
+  onUseSample: () => void;
 }
 
 function formatSize(bytes: number): string {
@@ -24,7 +26,7 @@ function formatSize(bytes: number): string {
  * The native input is still here, visually hidden, so keyboard and screen
  * reader users get the platform file picker unchanged.
  */
-export function FileDrop({ file, rows, running, onSelect, onClear, onAnalyze }: Props) {
+export function FileDrop({ file, rows, running, onSelect, onClear, onAnalyze, onUseSample }: Props) {
   const [over, setOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +87,16 @@ export function FileDrop({ file, rows, running, onSelect, onClear, onAnalyze }: 
             {running ? "Analysing…" : "Analyse"}
           </button>
         </div>
+
+        {!file && (
+          <p className="drop-sample">
+            No CSV handy?{" "}
+            <button className="link-btn" onClick={onUseSample} disabled={running}>
+              Use the sample
+            </button>{" "}
+            — 40 real TRAI consultation responses.
+          </p>
+        )}
 
         <input
           className="sr-only"

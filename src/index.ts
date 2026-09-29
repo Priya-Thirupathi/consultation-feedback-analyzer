@@ -92,6 +92,51 @@ function parseComments(buffer: Buffer): Comment[] {
     .filter((c) => c.text.length > 0);
 }
 
+// Shared by both /api/analyze and /api/analyze/sample, so the sample run goes
+// through the exact same extraction, consolidation and ranking as a real
+// upload rather than a parallel path that could quietly drift from it.
+async function runAnalysis(uploaded: Comment[]): Promise<AnalysisResult> {
+  // Truncate rather than reject, so an oversized file still demos. `capped`
+  // goes back so the page can say so instead of the counts implying the whole
+  // file was read.
+  const capped = uploaded.length > MAX_COMMENTS;
+  const comments = capped ? uploaded.slice(0, MAX_COMMENTS) : uploaded;
+
+  // Requests are paced to stay under the free tier limit, so a large upload
+  // takes minutes. Log progress rather than leaving the terminal silent.
+  console.log(`Analyzing ${comments.length} comments...`);
+  const extracted = await extractAll(comments, {
+    onProgress: (done, total) => console.log(`  extracted ${done}/${total}`),
+  });
+  const consolidated = await consolidateThemes(extracted);
+  const themes = groupAndRank(consolidated);
+
+  // Report what was set aside. Without this the total would claim every row
+  // fed a theme, when question restatements and boilerplate were dropped.
+  const skipped = consolidated.filter((c) => c.substantive === false).length;
+
+  const organisations = new Set(comments.map((c) => c.org).filter(Boolean)).size;
+
+  if (db) {
+    await db.collection("runs").insertOne({
+      at: new Date(),
+      total: comments.length,
+      themes,
+    });
+  }
+
+  return {
+    total: comments.length,
+    analyzed: comments.length - skipped,
+    skipped,
+    organisations: organisations || null,
+    capped,
+    uploadedRows: uploaded.length,
+    themeCount: themes.length,
+    themes,
+  };
+}
+
 app.post("/api/analyze", uploadCsv, async (req: Request, res: Response) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -101,49 +146,30 @@ app.post("/api/analyze", uploadCsv, async (req: Request, res: Response) => {
       return res.status(400).json({ error: "No comments found in the CSV" });
     }
 
-    // Truncate rather than reject, so an oversized file still demos. `capped`
-    // goes back so the page can say so instead of the counts implying the whole
-    // file was read.
-    const capped = uploaded.length > MAX_COMMENTS;
-    const comments = capped ? uploaded.slice(0, MAX_COMMENTS) : uploaded;
-
-    // Requests are paced to stay under the free tier limit, so a large upload
-    // takes minutes. Log progress rather than leaving the terminal silent.
-    console.log(`Analyzing ${comments.length} comments...`);
-    const extracted = await extractAll(comments, {
-      onProgress: (done, total) => console.log(`  extracted ${done}/${total}`),
-    });
-    const consolidated = await consolidateThemes(extracted);
-    const themes = groupAndRank(consolidated);
-
-    // Report what was set aside. Without this the total would claim every row
-    // fed a theme, when question restatements and boilerplate were dropped.
-    const skipped = consolidated.filter((c) => c.substantive === false).length;
-
-    const organisations = new Set(comments.map((c) => c.org).filter(Boolean)).size;
-
-    if (db) {
-      await db.collection("runs").insertOne({
-        at: new Date(),
-        total: comments.length,
-        themes,
-      });
-    }
-
-    const result: AnalysisResult = {
-      total: comments.length,
-      analyzed: comments.length - skipped,
-      skipped,
-      organisations: organisations || null,
-      capped,
-      uploadedRows: uploaded.length,
-      themeCount: themes.length,
-      themes,
-    };
-    res.json(result);
+    res.json(await runAnalysis(uploaded));
   } catch (e: unknown) {
     console.error(e);
     res.status(500).json({ error: e instanceof Error ? e.message : "Analysis failed." });
+  }
+});
+
+// Lets a first-time visitor see a real report without owning a CSV of their
+// own: runs the same pipeline over the 40 real TRAI responses bundled in the
+// repo. README and DEMO.md both call this "Use the sample" — it is the file
+// the demo script points at, not a separate toy dataset.
+const SAMPLE_FILE = "data/trai_sample.csv";
+
+app.post("/api/analyze/sample", async (_req: Request, res: Response) => {
+  try {
+    const uploaded = parseComments(fs.readFileSync(SAMPLE_FILE));
+    if (uploaded.length === 0) {
+      return res.status(500).json({ error: "The sample file has no comments." });
+    }
+
+    res.json(await runAnalysis(uploaded));
+  } catch (e: unknown) {
+    console.error(e);
+    res.status(500).json({ error: e instanceof Error ? e.message : "Sample analysis failed." });
   }
 });
 

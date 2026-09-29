@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { analyze, countRows } from "./api";
+import { analyze, analyzeSample, countRows } from "./api";
 import { deleteReport, loadReports, newReportId, saveReport } from "./storage";
 import { downloadCsv } from "./export";
 import type { AnalysisState, RankMode, SavedReport, Theme, ThemeLayout, View } from "./types";
@@ -138,6 +138,41 @@ export default function App() {
     }
   }
 
+  // Runs the bundled TRAI sample instead of an uploaded file, for a visitor
+  // who wants to see a real report before trusting the tool with their own CSV.
+  async function onUseSample() {
+    const SAMPLE_NAME = "trai_sample.csv";
+    const startedAt = Date.now();
+    setElapsed(0);
+    setFile(null);
+    setRows(null);
+    setState({ status: "running", rows: 40, startedAt });
+
+    try {
+      const result = await analyzeSample();
+      const seconds = Math.round((Date.now() - startedAt) / 1000);
+      setMode(result.organisations !== null ? "orgs" : "chunks");
+      setState({ status: "done", result, seconds });
+
+      const saved: SavedReport = {
+        id: newReportId(),
+        fileName: SAMPLE_NAME,
+        savedAt: Date.now(),
+        seconds,
+        result,
+      };
+      setReports(saveReport(saved));
+      setOpenId(saved.id);
+      setReportName(saved.fileName);
+      setView("overview");
+    } catch (e) {
+      setState({
+        status: "error",
+        message: e instanceof Error ? e.message : "Something went wrong.",
+      });
+    }
+  }
+
   function onOpenReport(report: SavedReport) {
     setState({ status: "done", result: report.result, seconds: report.seconds });
     setMode(report.result.organisations !== null ? "orgs" : "chunks");
@@ -197,6 +232,7 @@ export default function App() {
                     setState({ status: "idle" });
                   }}
                   onAnalyze={onAnalyze}
+                  onUseSample={onUseSample}
                 />
                 <Status state={state} elapsed={elapsed} />
               </div>
